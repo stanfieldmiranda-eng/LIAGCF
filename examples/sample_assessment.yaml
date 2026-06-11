@@ -1,0 +1,135 @@
+# LIAGCF Control Assessment
+# ─────────────────────────────────────────────────────────────────────────────
+# Complete this file to assess your organization's AI governance posture
+# against the Lifecycle-Integrated AI Governance Control Framework (LIAGCF).
+#
+# Run the validator:
+#   python scripts/validate_liagcf.py --input examples/sample_assessment.yaml
+#   python scripts/validate_liagcf.py --input examples/sample_assessment.yaml --output report.txt
+#
+# Status options:
+#   implemented      — control is fully in place with documented evidence
+#   partial          — control is partially implemented; gaps remain
+#   planned          — control is on the roadmap but not yet active
+#   not-implemented  — control has not been addressed
+# ─────────────────────────────────────────────────────────────────────────────
+
+organization: "Example Federal Agency"
+system_name: "Agency AI Decision Support System v2.1"
+assessor: "GRC Program Office"
+date: "2026-06-10"
+
+controls:
+
+  # ── GOVERN Function — Administrative Controls ─────────────────────────────
+
+  - id: A-1
+    status: implemented
+    notes: >
+      Enterprise AI Governance Charter approved by CISO and Deputy Secretary.
+      Enterprise AI Policy published on intranet. Last reviewed March 2026.
+
+  - id: A-2
+    status: implemented
+    notes: >
+      AI RACI Matrix documented in system security plan. Risk ownership
+      assigned to AI Program Manager. Governance Role Definitions reviewed
+      annually.
+
+  - id: A-3
+    status: partial
+    notes: >
+      Third-Party Risk Policy exists but does not yet include AI-specific
+      vendor assessment criteria. Vendor AI Risk Review Checklist is in
+      draft. SR control implementation in progress.
+
+  - id: A-4
+    status: planned
+    notes: >
+      Governance review cadence not yet formally defined. Audit schedule
+      for AI systems planned for Q3 2026. CA controls partially addressed
+      through existing ATO process.
+
+  # ── MAP Function — Administrative and Technical Controls ──────────────────
+
+  - id: A-5
+    status: implemented
+    notes: >
+      AI risk assessments required as part of system authorization process.
+      Risk Register entries completed for all production AI systems.
+
+  - id: A-6
+    status: implemented
+    notes: >
+      AI System Inventory maintained and updated quarterly. Risk
+      Categorization Register includes use context and affected population
+      fields added in 2026 refresh.
+
+  - id: T-1
+    status: partial
+    notes: >
+      Bias Risk Assessment completed at development phase. No ongoing
+      fairness monitoring in Operations phase. PT family expansion
+      recommended but not yet implemented.
+
+  - id: T-2
+    status: not-implemented
+    notes: >
+      Data Lineage Map does not exist. Training data sourced from multiple
+      third-party vendors without formal provenance documentation.
+      Identified as high-priority gap.
+
+  # ── MEASURE Function — Technical and Operational Controls ─────────────────
+
+  - id: T-3
+    status: implemented
+    notes: >
+      Model Validation Report completed before production release.
+      Testing Summary documented in system authorization package.
+
+  - id: T-4
+    status: partial
+    notes: >
+      Basic performance monitoring in place. Drift detection tooling not
+      yet deployed. GRC platform does not yet support AI-specific drift
+      metrics. Tooling procurement in progress.
+
+  - id: T-5
+    status: implemented
+    notes: >
+      Audit logging active. AU family controls implemented per existing
+      SP 800-53 baseline. Logs retained for 3 years per agency policy.
+
+  - id: O-1
+    status: planned
+    notes: >
+      Periodic AI governance review process not yet formalized. Currently
+      handled ad hoc. Formal cadence planned as part of A-4 implementation.
+
+  # ── MANAGE Function — Operational Controls ────────────────────────────────
+
+  - id: O-2
+    status: implemented
+    notes: >
+      Access Control Matrix in place for training data and model
+      environments. Privileged Access Review conducted quarterly.
+      AC and IA families implemented per existing baseline.
+
+  - id: O-3
+    status: implemented
+    notes: >
+      Configuration Baseline documented. Change Control Log maintained.
+      CM controls integrated with existing configuration management program.
+
+  - id: O-4
+    status: partial
+    notes: >
+      General incident response playbook exists. AI-specific incident
+      playbook not yet developed. After-Action Report template in draft.
+
+  - id: O-5
+    status: not-implemented
+    notes: >
+      No formal AI retirement process exists. Two legacy AI systems
+      currently in informal decommission status without documented
+      retirement plans, data deletion records, or access revocation logs.
