@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIAGCF Interactive Gap Analysis</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.6}
+a{color:#60a5fa}
+.header{background:#1e3a5f;padding:2rem;border-bottom:1px solid #1e40af40}
+.header h1{font-size:1.4rem;font-weight:700;color:#f1f5f9}
+.header h1 span{color:#60a5fa}
+.header-sub{font-size:0.8rem;color:#94a3b8;margin-top:0.25rem}
+.header-author{font-size:0.78rem;color:#94a3b8;margin-top:0.5rem}
+.header-author a{color:#60a5fa}
+.container{max-width:1100px;margin:0 auto;padding:1.5rem}
+.org-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.org-row input{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:0.6rem 0.8rem;color:#e2e8f0;font-size:0.875rem;width:100%}
+.org-row input::placeholder{color:#64748b}
+.section-title{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#60a5fa;margin-bottom:0.75rem;padding-bottom:0.4rem;border-bottom:1px solid #1e3a5f}
+.controls-grid{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:2rem}
+.control-row{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:0.875rem 1rem;display:grid;grid-template-columns:60px 1fr auto;gap:1rem;align-items:center}
+.control-row.retirement{border-left:3px solid #ef4444}
+.ctrl-id{font-family:monospace;font-weight:700;color:#60a5fa;font-size:0.9rem}
+.ctrl-info{}
+.ctrl-objective{font-size:0.82rem;color:#e2e8f0;font-weight:500}
+.ctrl-meta{font-size:0.72rem;color:#64748b;margin-top:2px}
+.ctrl-meta span{margin-right:0.75rem}
+.status-btns{display:flex;gap:4px;flex-wrap:nowrap}
+.sb{border:1px solid;border-radius:6px;padding:4px 8px;font-size:0.68rem;font-weight:600;cursor:pointer;transition:all 0.15s;background:transparent;white-space:nowrap}
+.sb-impl{border-color:#22c55e40;color:#22c55e}
+.sb-impl:hover,.sb-impl.active{background:#22c55e20;border-color:#22c55e}
+.sb-part{border-color:#f59e0b40;color:#f59e0b}
+.sb-part:hover,.sb-part.active{background:#f59e0b20;border-color:#f59e0b}
+.sb-plan{border-color:#60a5fa40;color:#60a5fa}
+.sb-plan:hover,.sb-plan.active{background:#60a5fa20;border-color:#60a5fa}
+.sb-not{border-color:#ef444440;color:#ef4444}
+.sb-not:hover,.sb-not.active{background:#ef444420;border-color:#ef4444}
+.badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
+.badge-gov{background:#1e3a5f;color:#93c5fd}
+.badge-map{background:#1e3a2f;color:#86efac}
+.badge-mea{background:#3f2d1e;color:#fcd34d}
+.badge-man{background:#3f1e1e;color:#fca5a5}
+.badge-adm{background:#1e2a4a;color:#a5b4fc}
+.badge-tec{background:#1a2e1a;color:#86efac}
+.badge-ope{background:#2e1a2e;color:#e879f9}
+.results{display:none;margin-top:1rem}
+.results.show{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem;margin-bottom:1.5rem}
+.card{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:1rem;text-align:center}
+.card-val{font-size:1.8rem;font-weight:800;line-height:1}
+.card-lbl{font-size:0.7rem;color:#94a3b8;margin-top:4px;text-transform:uppercase;letter-spacing:0.05em}
+.cov-bar{display:flex;height:1.25rem;border-radius:6px;overflow:hidden;background:#1e293b;margin-bottom:0.5rem}
+.cov-bar div{transition:width 0.4s}
+.legend{display:flex;gap:1rem;font-size:0.72rem;color:#94a3b8;flex-wrap:wrap;margin-bottom:1.5rem}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.breakdown-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.breakdown-card{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:1rem}
+.breakdown-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;font-size:0.8rem}
+.breakdown-label{min-width:90px;color:#94a3b8}
+.mini-bar{display:flex;height:0.4rem;border-radius:3px;overflow:hidden;background:#0f172a;flex:1}
+.mini-bar div{transition:width 0.4s}
+.breakdown-count{min-width:40px;text-align:right;font-size:0.75rem;color:#64748b}
+.gaps-section{margin-bottom:1.5rem}
+.gap-func{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#f59e0b;margin:0.75rem 0 0.4rem}
+.gap-item{background:#1e293b;border:1px solid #334155;border-left:3px solid #ef4444;border-radius:8px;padding:0.75rem;margin-bottom:0.4rem}
+.gap-head{display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;margin-bottom:3px}
+.gap-obj{font-size:0.8rem;color:#e2e8f0}
+.gap-art{font-size:0.72rem;color:#64748b;font-style:italic}
+.alert{background:#450a0a;border:1px solid #ef444440;border-left:4px solid #ef4444;border-radius:8px;padding:0.875rem 1rem;margin-bottom:1rem}
+.alert-title{font-weight:700;color:#fca5a5;font-size:0.85rem;margin-bottom:4px}
+.alert-body{font-size:0.8rem;color:#fca5a5}
+.generate-btn{background:#1e40af;color:#bfdbfe;border:none;border-radius:10px;padding:0.875rem 2rem;font-size:0.95rem;font-weight:700;cursor:pointer;width:100%;margin-bottom:1rem;transition:background 0.15s}
+.generate-btn:hover{background:#1d4ed8}
+.print-btn{background:transparent;color:#60a5fa;border:1px solid #1e40af;border-radius:8px;padding:0.5rem 1.25rem;font-size:0.8rem;cursor:pointer;margin-bottom:1.5rem}
+.print-btn:hover{background:#1e3a5f}
+.footer{background:#1e293b;border-top:1px solid #334155;padding:1.25rem 2rem;text-align:center;font-size:0.72rem;color:#64748b;margin-top:2rem}
+.footer a{color:#60a5fa}
+.no-gaps{color:#22c55e;font-size:0.85rem;font-weight:600}
+.pct-label{font-size:0.72rem;color:#94a3b8;margin-bottom:0.25rem}
+@media(max-width:700px){
+  .org-row{grid-template-columns:1fr}
+  .control-row{grid-template-columns:1fr;gap:0.5rem}
+  .breakdown-grid{grid-template-columns:1fr}
+  .status-btns{flex-wrap:wrap}
+}
+@media print{
+  body{background:#fff;color:#000}
+  .header{background:#1e3a5f;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .generate-btn,.print-btn{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>LIAGCF <span>Interactive Gap Analysis</span></h1>
+  <div class="header-sub">Lifecycle-Integrated AI Governance Control Framework &mdash; select your control status to generate a gap report</div>
+  <div class="header-author">
+    Dr. Miranda Stanfield, PhD, CISA, CISM &nbsp;&middot;&nbsp;
+    <a href="https://www.drmirandastanfield.com">www.drmirandastanfield.com</a> &nbsp;&middot;&nbsp;
+    <a href="https://github.com/stanfieldmiranda-eng/LIAGCF">github.com/stanfieldmiranda-eng/LIAGCF</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div style="margin-bottom:1.5rem">
+    <div class="section-title">Organization details</div>
+    <div class="org-row">
+      <input type="text" id="orgName" placeholder="Organization name">
+      <input type="text" id="sysName" placeholder="AI system name">
+    </div>
+  </div>
+
+  <div class="section-title">Step 1 &mdash; select status for each control</div>
+  <div style="font-size:0.75rem;color:#64748b;margin-bottom:1rem">
+    For each control, select: <span style="color:#22c55e">Implemented</span> &nbsp;
+    <span style="color:#f59e0b">Partial</span> &nbsp;
+    <span style="color:#60a5fa">Planned</span> &nbsp;
+    <span style="color:#ef4444">Not implemented</span>
+  </div>
+
+  <div class="controls-grid" id="controlsGrid"></div>
+
+  <button class="generate-btn" onclick="generate()">Generate gap analysis report</button>
+
+  <div class="results" id="results">
+    <div class="section-title">Gap analysis results</div>
+    <button class="print-btn" onclick="window.print()">Print / save as PDF</button>
+    <div id="alert"></div>
+    <div class="cards" id="cards"></div>
+    <div class="pct-label" id="pctLabel"></div>
+    <div class="cov-bar" id="covBar"></div>
+    <div class="legend">
+      <span><span class="dot" style="background:#22c55e"></span>Implemented</span>
+      <span><span class="dot" style="background:#f59e0b"></span>Partial</span>
+      <span><span class="dot" style="background:#60a5fa"></span>Planned</span>
+      <span><span class="dot" style="background:#ef4444"></span>Not implemented</span>
+      <span><span class="dot" style="background:#374151"></span>Not assessed</span>
+    </div>
+    <div class="breakdown-grid" id="breakdown"></div>
+    <div class="section-title">Priority gaps</div>
+    <div style="font-size:0.75rem;color:#64748b;margin-bottom:0.75rem">Address GOVERN controls first. Governance structures are preconditions for technical and operational control enforcement.</div>
+    <div class="gaps-section" id="gaps"></div>
+  </div>
+
+</div>
+
+<div class="footer">
+  LIAGCF v1.0 &nbsp;&middot;&nbsp;
+  <a href="https://github.com/stanfieldmiranda-eng/LIAGCF">github.com/stanfieldmiranda-eng/LIAGCF</a>
+  &nbsp;&middot;&nbsp; Framework by Dr. Miranda Stanfield, PhD, CISA, CISM &nbsp;&middot;&nbsp;
+  <a href="https://www.drmirandastanfield.com">www.drmirandastanfield.com</a><br>
+  <span style="margin-top:4px;display:block">
+    Stanfield, M. (2026). Evaluating control-based AI governance in cybersecurity GRC programs.
+    RAIS Conference Proceedings, March 12&ndash;13, 2026. DOI: 10.5281/zenodo.19553772
+  </span>
+</div>
+
+<script>
+const CONTROLS=[
+  {id:"A-1",cat:"Administrative",obj:"Establish a formal enterprise AI governance policy and scope",rmf:"GOVERN",phase:"Strategy & Design",families:"PM, PL",artifacts:"AI Governance Charter; Enterprise AI Policy"},
+  {id:"A-2",cat:"Administrative",obj:"Define AI accountability, decision rights, and risk ownership",rmf:"GOVERN",phase:"Strategy & Design",families:"PM",artifacts:"AI RACI Matrix; Governance Role Definitions"},
+  {id:"A-3",cat:"Administrative",obj:"Establish third-party AI risk governance policies",rmf:"GOVERN",phase:"Procurement",families:"SR, SA",artifacts:"Vendor AI Risk Review Checklist; Third-Party Risk Policy"},
+  {id:"A-4",cat:"Administrative",obj:"Define enterprise AI audit and governance review cadence",rmf:"GOVERN",phase:"Operations",families:"CA, PM",artifacts:"AI Governance Review Plan; Audit Schedule"},
+  {id:"A-5",cat:"Administrative",obj:"Require AI risk assessments prior to deployment",rmf:"MAP",phase:"Development",families:"RA, CA",artifacts:"AI Risk Assessment Report; Risk Register Entry"},
+  {id:"A-6",cat:"Administrative",obj:"Categorize AI systems by risk level, use context, and affected population",rmf:"MAP",phase:"Strategy & Design",families:"RA, PL",artifacts:"AI System Inventory; Risk Categorization Register"},
+  {id:"T-1",cat:"Technical",obj:"Identify and assess potential for discriminatory or disparate impact outcomes",rmf:"MAP",phase:"Development",families:"RA, SI",artifacts:"Bias Risk Assessment; Fairness Evaluation Report"},
+  {id:"T-2",cat:"Technical",obj:"Map data provenance, lineage, and quality risks for training datasets",rmf:"MAP",phase:"Data Preparation",families:"SA, SR",artifacts:"Data Lineage Map; Training Data Quality Report"},
+  {id:"T-3",cat:"Technical",obj:"Validate AI models prior to production release",rmf:"MEASURE",phase:"Development",families:"CA, SA",artifacts:"Model Validation Report; Testing Summary"},
+  {id:"T-4",cat:"Technical",obj:"Monitor model performance and detect drift",rmf:"MEASURE",phase:"Operations",families:"SI, CA",artifacts:"Drift Monitoring Dashboard; Performance Metrics Report"},
+  {id:"T-5",cat:"Technical",obj:"Log AI system activity for traceability and auditability",rmf:"MEASURE",phase:"Operations",families:"AU",artifacts:"Audit Logs; Monitoring Dashboard"},
+  {id:"O-1",cat:"Operational",obj:"Conduct periodic AI governance and risk reviews",rmf:"MEASURE",phase:"Operations",families:"CA, RA",artifacts:"Governance Review Report; Risk Reassessment Summary"},
+  {id:"O-2",cat:"Operational",obj:"Enforce access controls on AI training and operational data",rmf:"MANAGE",phase:"Data Preparation / Operations",families:"AC, IA",artifacts:"Access Control Matrix; Privileged Access Review"},
+  {id:"O-3",cat:"Operational",obj:"Protect AI models from unauthorized modification",rmf:"MANAGE",phase:"Operations",families:"CM, SI",artifacts:"Configuration Baseline; Change Control Log"},
+  {id:"O-4",cat:"Operational",obj:"Execute AI incident response playbooks",rmf:"MANAGE",phase:"Operations",families:"IR, SI",artifacts:"AI Incident Playbook; After-Action Report"},
+  {id:"O-5",cat:"Operational",obj:"Retire AI systems exceeding defined risk tolerance",rmf:"MANAGE",phase:"Retirement",families:"SA, CM, MP",artifacts:"AI Retirement Plan; Risk Closure Documentation",retirement:true}
+];
+
+const RMF_BADGE={GOVERN:"badge-gov",MAP:"badge-map",MEASURE:"badge-mea",MANAGE:"badge-man"};
+const CAT_BADGE={Administrative:"badge-adm",Technical:"badge-tec",Operational:"badge-ope"};
+const statuses={};
+
+function buildControls(){
+  const g=document.getElementById("controlsGrid");
+  CONTROLS.forEach(c=>{
+    statuses[c.id]=null;
+    const row=document.createElement("div");
+    row.className="control-row"+(c.retirement?" retirement":"");
+    row.innerHTML=`
+      <div class="ctrl-id">${c.id}</div>
+      <div class="ctrl-info">
+        <div class="ctrl-objective">${c.obj}</div>
+        <div class="ctrl-meta">
+          <span><span class="badge ${RMF_BADGE[c.rmf]}">${c.rmf}</span></span>
+          <span><span class="badge ${CAT_BADGE[c.cat]}">${c.cat}</span></span>
+          <span style="color:#475569">${c.phase}</span>
+          <span style="color:#475569">SP 800-53: ${c.families}</span>
+        </div>
+      </div>
+      <div class="status-btns">
+        <button class="sb sb-impl" onclick="setStatus('${c.id}','implemented',this)">Implemented</button>
+        <button class="sb sb-part" onclick="setStatus('${c.id}','partial',this)">Partial</button>
+        <button class="sb sb-plan" onclick="setStatus('${c.id}','planned',this)">Planned</button>
+        <button class="sb sb-not" onclick="setStatus('${c.id}','not-implemented',this)">Not implemented</button>
+      </div>`;
+    g.appendChild(row);
+  });
+}
+
+function setStatus(id,status,btn){
+  statuses[id]=status;
+  const row=btn.closest(".control-row");
+  row.querySelectorAll(".sb").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+function generate(){
+  const total=CONTROLS.length;
+  const impl=CONTROLS.filter(c=>statuses[c.id]==="implemented").length;
+  const part=CONTROLS.filter(c=>statuses[c.id]==="partial").length;
+  const plan=CONTROLS.filter(c=>statuses[c.id]==="planned").length;
+  const notImpl=CONTROLS.filter(c=>statuses[c.id]==="not-implemented").length;
+  const notAss=CONTROLS.filter(c=>statuses[c.id]===null).length;
+  const pct=Math.round((impl/total)*100);
+
+  const cards=document.getElementById("cards");
+  cards.innerHTML=[
+    {v:`${impl}/${total}`,l:"Implemented",c:"#22c55e"},
+    {v:`${part}/${total}`,l:"Partial",c:"#f59e0b"},
+    {v:plan,l:"Planned",c:"#60a5fa"},
+    {v:notImpl,l:"Not implemented",c:"#ef4444"},
+    {v:notAss,l:"Not assessed",c:"#6b7280"}
+  ].map(x=>`<div class="card"><div class="card-val" style="color:${x.c}">${x.v}</div><div class="card-lbl">${x.l}</div></div>`).join("");
+
+  document.getElementById("pctLabel").textContent=`Overall: ${pct}% fully implemented`;
+  const bar=document.getElementById("covBar");
+  bar.innerHTML=[
+    {w:Math.round(impl/total*100),c:"#22c55e"},
+    {w:Math.round(part/total*100),c:"#f59e0b"},
+    {w:Math.round(plan/total*100),c:"#60a5fa"},
+    {w:Math.round(notImpl/total*100),c:"#ef4444"},
+    {w:100-Math.round(impl/total*100)-Math.round(part/total*100)-Math.round(plan/total*100)-Math.round(notImpl/total*100),c:"#374151"}
+  ].map(x=>`<div style="width:${x.w}%;background:${x.c}"></div>`).join("");
+
+  const RMF=["GOVERN","MAP","MEASURE","MANAGE"];
+  const CATS=["Administrative","Technical","Operational"];
+  const bd=document.getElementById("breakdown");
+  bd.innerHTML=`
+    <div class="breakdown-card">
+      <div class="section-title" style="margin-bottom:0.75rem">By RMF function</div>
+      ${RMF.map(f=>{
+        const fc=CONTROLS.filter(c=>c.rmf===f);
+        const fi=fc.filter(c=>statuses[c.id]==="implemented").length;
+        const fp=fc.filter(c=>statuses[c.id]==="partial").length;
+        const pct=Math.round(fi/fc.length*100);
+        return `<div class="breakdown-row">
+          <span class="breakdown-label"><span class="badge ${RMF_BADGE[f]}">${f}</span></span>
+          <div class="mini-bar">
+            <div style="width:${pct}%;background:#22c55e"></div>
+            <div style="width:${Math.round(fp/fc.length*100)}%;background:#f59e0b"></div>
+          </div>
+          <span class="breakdown-count">${fi}/${fc.length}</span>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="breakdown-card">
+      <div class="section-title" style="margin-bottom:0.75rem">By control category</div>
+      ${CATS.map(cat=>{
+        const cc=CONTROLS.filter(c=>c.cat===cat);
+        const ci=cc.filter(c=>statuses[c.id]==="implemented").length;
+        const cp=cc.filter(c=>statuses[c.id]==="partial").length;
+        const pct=Math.round(ci/cc.length*100);
+        return `<div class="breakdown-row">
+          <span class="breakdown-label" style="font-size:0.75rem;color:#94a3b8">${cat}</span>
+          <div class="mini-bar">
+            <div style="width:${pct}%;background:#22c55e"></div>
+            <div style="width:${Math.round(cp/cc.length*100)}%;background:#f59e0b"></div>
+          </div>
+          <span class="breakdown-count">${ci}/${cc.length}</span>
+        </div>`;
+      }).join("")}
+    </div>`;
+
+  const gapControls=CONTROLS.filter(c=>statuses[c.id]==="not-implemented"||statuses[c.id]===null);
+  const gapsEl=document.getElementById("gaps");
+  if(gapControls.length===0){
+    gapsEl.innerHTML='<p class="no-gaps">No gaps identified. All controls are implemented or in progress.</p>';
+  } else {
+    let html="";
+    RMF.forEach(f=>{
+      const fg=gapControls.filter(c=>c.rmf===f);
+      if(!fg.length) return;
+      html+=`<div class="gap-func">${f}</div>`;
+      fg.forEach(c=>{
+        const s=statuses[c.id]===null?"Not assessed":"Not implemented";
+        html+=`<div class="gap-item">
+          <div class="gap-head">
+            <span style="font-family:monospace;font-weight:700;color:#60a5fa">${c.id}</span>
+            <span style="font-size:0.72rem;color:#94a3b8">${c.phase}</span>
+            <span style="font-size:0.72rem;color:#60a5fa">SP 800-53: ${c.families}</span>
+            <span style="font-size:0.68rem;color:#ef4444;font-weight:600">${s}</span>
+          </div>
+          <div class="gap-obj">${c.obj}</div>
+          <div class="gap-art">Evidence needed: ${c.artifacts}</div>
+        </div>`;
+      });
+    });
+    gapsEl.innerHTML=html;
+  }
+
+  const o5=statuses["O-5"];
+  const alertEl=document.getElementById("alert");
+  if(o5!=="implemented"&&o5!=="partial"){
+    alertEl.innerHTML=`<div class="alert">
+      <div class="alert-title">Retirement phase alert</div>
+      <div class="alert-body">Control O-5 is not implemented. Retired AI systems generate residual risks including unrevoked model access, persistent data exposure, and residual inference capabilities. Implement before decommissioning any AI system.</div>
+    </div>`;
+  } else {
+    alertEl.innerHTML="";
+  }
+
+  const r=document.getElementById("results");
+  r.classList.add("show");
+  r.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+buildControls();
+</script>
+</body>
+</html>
